@@ -274,6 +274,61 @@ body {
 }
 .footer a { color: var(--blue); text-decoration: none; }
 
+/* ── 公司清單（招 7） ── */
+.co-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.co-list::-webkit-scrollbar { width: 4px; }
+.co-list::-webkit-scrollbar-track { background: transparent; }
+.co-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.co-item {
+  background: rgba(74,157,214,0.05);
+  border: 1px solid rgba(74,157,214,0.14);
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: background 0.15s;
+}
+.co-item:hover { background: rgba(74,157,214,0.1); }
+.co-item.co-current {
+  background: rgba(74,157,214,0.12);
+  border-color: rgba(74,157,214,0.4);
+}
+.co-item.co-inactive { opacity: 0.48; }
+
+.co-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.co-name { font-size: 14px; font-weight: 600; color: var(--white); }
+.co-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(74,157,214,0.15);
+  color: var(--blue);
+  white-space: nowrap;
+}
+.co-tag.co-tag-off {
+  background: rgba(200,80,80,0.12);
+  color: #e08080;
+}
+.co-item-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 @media (max-width: 760px) {
   .header-title { font-size: 30px; }
   .cards-grid { grid-template-columns: 1fr; }
@@ -360,7 +415,7 @@ async function doSearch() {
   document.getElementById('loadingWrap').style.display = 'block';
   document.getElementById('resultsSection').classList.remove('show');
 
-  let co = null, apiError = null;
+  let co = null, apiError = null, relatedCos = [];
   try {
     const isId = isTaxId(raw);
     const filter = isId
@@ -370,17 +425,27 @@ async function doSearch() {
     const res = await fetch(url);
     const data = await res.json();
     co = (data && data.length > 0) ? data[0] : null;
+
+    if (co && co.Responsible_Name) {
+      document.getElementById('loadingWrap').querySelector('p').textContent =
+        `查詢 ${co.Responsible_Name} 名下公司中…`;
+      const ceoFilter = `Responsible_Name eq '${co.Responsible_Name}'`;
+      const relUrl = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${encodeURIComponent(ceoFilter)}&$skip=0&$top=100`;
+      const relRes = await fetch(relUrl);
+      const relData = await relRes.json();
+      relatedCos = Array.isArray(relData) ? relData : [];
+    }
   } catch (e) {
     apiError = '政府 API 暫時無回應，即時資料無法顯示，查詢連結仍可使用。';
   }
 
   document.getElementById('loadingWrap').style.display = 'none';
   btn.disabled = false;
-  render(raw, co, apiError);
+  render(raw, co, apiError, relatedCos);
 }
 
 /* ── 渲染 ── */
-function render(input, co, apiError) {
+function render(input, co, apiError, relatedCos) {
   const name  = co ? co.Company_Name : input;
   const taxId = co ? co.Business_Account_No : (isTaxId(input) ? input : '');
 
@@ -391,7 +456,7 @@ function render(input, co, apiError) {
 
   const grid = document.getElementById('cardsGrid');
   grid.innerHTML = '';
-  [c1(co, apiError, name), c2(name), c3(name), c4(name), c5(name), c6(name), c7(co, name)]
+  [c1(co, apiError, name), c2(name), c3(name), c4(name), c5(name), c6(name), c7(co, name, relatedCos)]
     .forEach(el => grid.appendChild(el));
 
   document.getElementById('resultsSection').classList.add('show');
@@ -535,30 +600,61 @@ function c6(name) {
 }
 
 /* ── 招 7｜集團關係辨識 ── */
-function c7(co, name) {
+function c7(co, name, relatedCos) {
   const ceoName = co && co.Responsible_Name ? co.Responsible_Name : null;
-  const ceoHint = ceoName ? `
-    <div class="hint-box">
-      👤 負責人：<strong>${ceoName}</strong><br>
-      可至商工登記以負責人姓名查詢旗下所有公司，找出集團全貌
-    </div>` : '';
+  const hasData = relatedCos && relatedCos.length > 0;
 
-  const buttons = [
-    ['↗ Google 搜尋集團關係', `https://www.google.com/search?q="${enc(name)}" 集團 子公司 關係企業`, false],
-  ];
-  if (ceoName) {
-    buttons.push(['↗ 查負責人旗下公司', `https://findbiz.nat.gov.tw/fts/query/QueryBar/queryBar.do`, true]);
+  let listHtml = '';
+  if (hasData) {
+    const sorted = [...relatedCos].sort((a, b) => {
+      const aActive = a.Company_Status === '01';
+      const bActive = b.Company_Status === '01';
+      if (aActive !== bActive) return aActive ? -1 : 1;
+      return parseInt(b.Capital_Stock_Amount || 0) - parseInt(a.Capital_Stock_Amount || 0);
+    });
+    const activeCount = sorted.filter(c => c.Company_Status === '01').length;
+
+    listHtml = `
+      <div class="hint-box" style="margin-bottom:14px;">
+        👤 負責人 <strong>${ceoName}</strong> 名下共 <strong>${relatedCos.length}</strong> 家公司
+        （${activeCount} 家正常營業、${relatedCos.length - activeCount} 家已停業）
+      </div>
+      <div class="co-list">
+        ${sorted.map(c => {
+          const isActive = c.Company_Status === '01';
+          const isCurrent = c.Business_Account_No === co.Business_Account_No;
+          return `
+            <div class="co-item ${isCurrent ? 'co-current' : ''} ${!isActive ? 'co-inactive' : ''}">
+              <div class="co-item-main">
+                <span class="co-name">${c.Company_Name}</span>
+                ${isCurrent ? '<span class="co-tag">查詢中</span>' : ''}
+                ${!isActive ? '<span class="co-tag co-tag-off">已停業</span>' : ''}
+              </div>
+              <div class="co-item-meta">
+                <span>${c.Business_Account_No}</span>
+                <span>${formatCapital(c.Capital_Stock_Amount)}</span>
+                ${c.Date_Approved ? `<span>成立 ${c.Date_Approved.slice(0,4)}</span>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  } else if (ceoName && co) {
+    listHtml = `<div class="hint-box">👤 負責人：<strong>${ceoName}</strong><br>未查到其他登記公司</div>`;
   }
 
   const inner = `
     <div class="card-desc">
-      建商常以子公司或品牌名銷售，查清楚背後集團才算做足功課<br>
-      確認母公司財務狀況，才是真正的關鍵
+      建商常以子公司或品牌名銷售，查清楚背後集團才算做足功課<br>確認母公司財務狀況，才是真正的關鍵
     </div>
-    ${ceoHint}
-    ${linkBtns(buttons)}`;
+    ${listHtml}
+    ${linkBtns([
+      ['↗ Google 搜尋集團關係', `https://www.google.com/search?q="${enc(name)}" 集團 子公司 關係企業`, false],
+    ])}`;
 
-  return makeCard('🔍', '招 7｜集團關係辨識', 'badge-link', '手動查詢', inner);
+  return makeCard('🔍', '招 7｜集團關係辨識',
+    hasData ? 'badge-live' : 'badge-link',
+    hasData ? `即時資料（${relatedCos.length} 家）` : '手動查詢',
+    inner);
 }
 
 /* ── Enter 鍵 ── */
