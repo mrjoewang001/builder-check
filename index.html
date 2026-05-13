@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>建商背景七招查 | 喬王工具箱</title>
+<meta name="description" content="輸入建商名稱或統一編號，一次查清商工登記、公平會裁罰、司法判決、口碑評價、工程履歷、工安紀錄、集團關係七大風險指標">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0b1520;
+  --card: #162535;
+  --blue: #4A9DD6;
+  --gold: #F5C518;
+  --text: #AECFE6;
+  --white: #FFFFFF;
+  --muted: rgba(174,207,230,0.45);
+  --border: rgba(74,157,214,0.2);
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(160deg, #0d1f32 0%, var(--bg) 100%);
+  padding: 60px 24px 52px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.header-tag {
+  color: var(--blue);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  margin-bottom: 18px;
+}
+.header-title {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.header-title em { font-style: normal; color: var(--gold); }
+.header-sub {
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ── Search ── */
+.search-wrap {
+  max-width: 680px;
+  margin: 44px auto 0;
+  padding: 0 24px;
+}
+.search-box {
+  display: flex;
+  gap: 10px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 8px 8px 22px;
+  transition: border-color 0.2s;
+}
+.search-box:focus-within { border-color: var(--blue); }
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--white);
+  font-size: 17px;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+}
+.search-input::placeholder { color: var(--muted); }
+.search-btn {
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.search-btn:hover { background: #3a8dc6; }
+.search-btn:disabled { background: #2a4a5e; cursor: wait; }
+.search-hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Loading ── */
+.loading-wrap {
+  display: none;
+  text-align: center;
+  padding: 70px 24px;
+  color: var(--text);
+}
+.spinner {
+  width: 42px; height: 42px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 18px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Results ── */
+.results {
+  display: none;
+  max-width: 1080px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+}
+.results.show { display: block; }
+
+.res-header {
+  text-align: center;
+  padding: 40px 0 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.res-company { font-size: 30px; font-weight: 900; }
+.res-meta {
+  color: var(--blue);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  gap: 20px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.card-bar {
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--gold));
+}
+.card-body { padding: 28px 30px 26px; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-icon {
+  width: 42px; height: 42px;
+  background: rgba(74,157,214,0.12);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px;
+}
+.card-title { font-size: 17px; font-weight: 700; }
+
+.badge {
+  font-size: 12px; font-weight: 600;
+  padding: 4px 12px; border-radius: 20px;
+  letter-spacing: 0.06em;
+}
+.badge-live { background: rgba(74,214,141,0.12); color: #4AD68D; border: 1px solid rgba(74,214,141,0.3); }
+.badge-link { background: rgba(74,157,214,0.1); color: var(--blue); border: 1px solid var(--border); }
+.badge-warn { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.3); }
+
+/* Data rows */
+.data-rows { margin-bottom: 18px; }
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(74,157,214,0.08);
+}
+.data-row:last-child { border-bottom: none; }
+.dl { color: var(--muted); font-size: 13px; flex-shrink: 0; }
+.dv { font-size: 14px; font-weight: 500; text-align: right; word-break: break-all; }
+.dv.good { color: #4AD68D; }
+.dv.warn { color: var(--gold); }
+.dv.bad  { color: #F55A5A; }
+
+/* Desc & hint */
+.card-desc {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.85;
+  margin-bottom: 18px;
+}
+.hint-box {
+  background: rgba(74,157,214,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.75;
+  margin-bottom: 18px;
+}
+.hint-box strong { color: var(--white); }
+
+.api-error {
+  background: rgba(245,90,90,0.08);
+  border: 1px solid rgba(245,90,90,0.25);
+  border-radius: 8px;
+  padding: 13px 16px;
+  color: #f5a0a0;
+  font-size: 13px;
+  margin-bottom: 18px;
+  line-height: 1.7;
+}
+
+/* Buttons */
+.link-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.lb {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(74,157,214,0.08);
+  border: 1px solid rgba(74,157,214,0.28);
+  color: var(--blue);
+  padding: 9px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  text-decoration: none; letter-spacing: 0.04em;
+  transition: background 0.18s, border-color 0.18s;
+  cursor: pointer; font-family: inherit;
+  white-space: nowrap;
+}
+.lb:hover { background: rgba(74,157,214,0.15); border-color: var(--blue); }
+.lb.gold {
+  background: rgba(245,197,24,0.07);
+  border-color: rgba(245,197,24,0.28);
+  color: var(--gold);
+}
+.lb.gold:hover { background: rgba(245,197,24,0.13); }
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  color: var(--muted);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  line-height: 1.9;
+}
+.footer a { color: var(--blue); text-decoration: none; }
+
+@media (max-width: 760px) {
+  .header-title { font-size: 30px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .card-body { padding: 22px 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-tag">▌ 喬王工具箱</div>
+  <h1 class="header-title">建商背景<em>七招查</em></h1>
+  <p class="header-sub">
+    輸入建商名稱或統一編號，一次查清七大風險指標<br>
+    買房前做足功課，避免踩到地雷建商
+  </p>
+  <div class="search-wrap">
+    <div class="search-box">
+      <input class="search-input" id="searchInput" type="text"
+        placeholder="輸入建商名稱 或 統一編號（8碼）" autocomplete="off">
+      <button class="search-btn" id="searchBtn" onclick="doSearch()">查詢</button>
+    </div>
+    <p class="search-hint">例：「遠雄建設」或「03145666」</p>
+  </div>
+</div>
+
+<!-- ── Loading ── -->
+<div class="loading-wrap" id="loadingWrap">
+  <div class="spinner"></div>
+  <p>查詢政府開放資料中，請稍候…</p>
+</div>
+
+<!-- ── Results ── -->
+<div class="results" id="resultsSection">
+  <div class="res-header">
+    <div class="res-company" id="resName">—</div>
+    <div class="res-meta" id="resMeta">—</div>
+  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<!-- ── Footer ── -->
+<div class="footer">
+  資料來源：經濟部商業司、公平交易委員會、司法院、內政部建管、勞動部職安署<br>
+  本工具僅供參考，買房前請務必實地查核 ｜
+  <a href="https://mrjoewang.com/construction-company-good-or-bad/" target="_blank">延伸閱讀：建商怎麼查？</a>
+  ｜ <a href="https://mrjoewang.com" target="_blank">喬王的房產理財</a>
+</div>
+
+<script>
+/* ── 工具函數 ── */
+const enc = s => encodeURIComponent(s);
+
+function isTaxId(s) { return /^\d{8}$/.test(s.trim()); }
+
+function formatCapital(n) {
+  const num = parseInt(n);
+  if (!n || isNaN(num)) return '—';
+  if (num >= 100000000) return (num / 100000000).toFixed(1) + ' 億元';
+  return Math.round(num / 10000).toLocaleString() + ' 萬元';
+}
+
+function capitalClass(n) {
+  const num = parseInt(n);
+  if (isNaN(num) || !n) return '';
+  return num >= 25000000 ? 'good' : 'warn';
+}
+
+function yearsSince(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24 * 365.25));
+}
+
+/* ── 主查詢 ── */
+async function doSearch() {
+  const raw = document.getElementById('searchInput').value.trim();
+  if (!raw) { document.getElementById('searchInput').focus(); return; }
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  document.getElementById('loadingWrap').style.display = 'block';
+  document.getElementById('resultsSection').classList.remove('show');
+
+  let co = null, apiError = null;
+  try {
+    const isId = isTaxId(raw);
+    const filter = isId
+      ? `Business_Account_No eq '${raw}'`
+      : `startswith(Company_Name,'${raw}') eq true`;
+    const url = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${encodeURIComponent(filter)}&$skip=0&$top=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    co = (data && data.length > 0) ? data[0] : null;
+  } catch (e) {
+    apiError = '政府 API 暫時無回應，即時資料無法顯示，查詢連結仍可使用。';
+  }
+
+  document.getElementById('loadingWrap').style.display = 'none';
+  btn.disabled = false;
+  render(raw, co, apiError);
+}
+
+/* ── 渲染 ── */
+function render(input, co, apiError) {
+  const name  = co ? co.Company_Name : input;
+  const taxId = co ? co.Business_Account_No : (isTaxId(input) ? input : '');
+
+  document.getElementById('resName').textContent = name;
+  document.getElementById('resMeta').textContent = taxId
+    ? `統一編號：${taxId}`
+    : (!co ? '未找到商業司登記資料（請確認全名或嘗試輸入統編）' : '');
+
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  [c1(co, apiError, name), c2(name), c3(name), c4(name), c5(name), c6(name), c7(co, name)]
+    .forEach(el => grid.appendChild(el));
+
+  document.getElementById('resultsSection').classList.add('show');
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── 建立卡片的通用包裝 ── */
+function makeCard(iconEmoji, titleText, badgeClass, badgeLabel, innerHtml) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="card-title-row">
+          <div class="card-icon">${iconEmoji}</div>
+          <div class="card-title">${titleText}</div>
+        </div>
+        <span class="badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      ${innerHtml}
+    </div>`;
+  return card;
+}
+
+function row(label, val, cls) {
+  return `<div class="data-row"><span class="dl">${label}</span><span class="dv ${cls||''}">${val}</span></div>`;
+}
+
+function linkBtns(buttons) {
+  return `<div class="link-buttons">${buttons.map(([label, href, gold]) =>
+    `<a class="lb ${gold ? 'gold' : ''}" href="${href}" target="_blank" rel="noopener">${label}</a>`
+  ).join('')}</div>`;
+}
+
+/* ── 招 1｜商工登記 ── */
+function c1(co, apiError, name) {
+  let inner = '';
+  if (apiError) {
+    inner = `<div class="api-error">⚠️ ${apiError}</div>`;
+  } else if (!co) {
+    inner = `<div class="api-error">找不到「${name}」的商業司登記資料。<br>可能是品牌名或子公司名，請嘗試輸入母公司全名或統一編號。</div>`;
+  } else {
+    const years = yearsSince(co.Date_Approved);
+    const ySt   = years === null ? '' : years >= 3 ? 'good' : 'warn';
+    const capSt = capitalClass(co.Capital_Stock_Amount);
+    const statusOk = co.Company_Status === '01';
+
+    inner = `
+      <div class="data-rows">
+        ${row('公司全名', co.Company_Name || '—')}
+        ${row('統一編號', co.Business_Account_No || '—')}
+        ${row('負責人',   co.Responsible_Name || '—')}
+        ${row('成立日期', co.Date_Approved
+            ? `${co.Date_Approved}${years !== null ? `（${years} 年）` : ''}` : '—', ySt)}
+        ${row('資本額',   formatCapital(co.Capital_Stock_Amount), capSt)}
+        ${row('公司狀態', statusOk ? '正常營業 ✓' : (co.Company_Status || '—'),
+                          statusOk ? 'good' : 'warn')}
+        ${row('登記地址', co.Company_Location || '—')}
+      </div>
+      <div class="hint-box">
+        ✅ 資本額 <strong>2,500 萬以上</strong>、成立 <strong>3 年以上</strong>為基本門檻<br>
+        🟡 黃色 = 低於門檻，需進一步確認　🟢 綠色 = 符合
+      </div>`;
+  }
+
+  inner += linkBtns([['↗ 商工登記公示系統', 'https://findbiz.nat.gov.tw/fts/query/QueryBar/queryBar.do']]);
+
+  return makeCard('🏢', '招 1｜商工登記', co ? 'badge-live' : 'badge-warn',
+    co ? '即時資料' : '手動查詢', inner);
+}
+
+/* ── 招 2｜公平交易委員會 ── */
+function c2(name) {
+  const inner = `
+    <div class="card-desc">
+      查詢建商是否曾遭公平會裁罰「不實廣告」<br>
+      有裁罰紀錄不代表建商一定爛，但值得進一步了解
+    </div>
+    ${linkBtns([
+      ['↗ Google 搜尋裁罰紀錄', `https://www.google.com/search?q="${enc(name)}" 公平交易委員會 裁罰 不實廣告`],
+      ['↗ 公平會官網查詢',     'https://www.ftc.gov.tw/internet/main/doc/docList.aspx?uid=138'],
+    ])}`;
+  return makeCard('⚖️', '招 2｜公平交易委員會', 'badge-link', '手動查詢', inner);
+}
+
+/* ── 招 3｜司法院判決書 ── */
+function c3(name) {
+  const inner = `
+    <div class="card-desc">
+      在司法院法學資料系統輸入建商名稱<br>
+      看有無「購屋糾紛、工程瑕疵」相關民事訴訟紀錄
+    </div>
+    ${linkBtns([
+      ['↗ 司法院判決查詢系統',  'https://judgment.judicial.gov.tw/FJUD/default.aspx'],
+      ['↗ Google 搜尋訴訟紀錄', `https://www.google.com/search?q="${enc(name)}" 訴訟 判決 購屋糾紛 工程瑕疵`],
+    ])}`;
+  return makeCard('📋', '招 3｜司法院判決書', 'badge-link', '手動查詢', inner);
+}
+
+/* ── 招 4｜售後口碑觀察 ── */
+function c4(name) {
+  const inner = `
+    <div class="card-desc">
+      看住戶實際使用後的評價，特別注意保固期內出問題時<br>建商有沒有出現、處理態度如何
+    </div>
+    ${linkBtns([
+      ['↗ Mobile01 討論',   `https://www.google.com/search?q="${enc(name)}" site:mobile01.com`],
+      ['↗ PTT 討論',        `https://www.google.com/search?q="${enc(name)}" site:ptt.cc`],
+      ['↗ Google 評價搜尋', `https://www.google.com/search?q="${enc(name)}" 評價 保固 住戶 心得`, true],
+    ])}`;
+  return makeCard('💬', '招 4｜售後口碑觀察', 'badge-link', '手動查詢', inner);
+}
+
+/* ── 招 5｜建築工程履歷 ── */
+function c5(name) {
+  const inner = `
+    <div class="card-desc">
+      查詢建商過往建案數量與建照、使照申請進度<br>
+      過去蓋過幾棟？有沒有工程延宕或爛尾的紀錄？
+    </div>
+    ${linkBtns([
+      ['↗ 內政部建築履歷查詢',  'https://cpabm.cpami.gov.tw/cers/Welcome.do'],
+      ['↗ Google 搜尋建案紀錄', `https://www.google.com/search?q="${enc(name)}" 建案 建照 使照 完工`],
+    ])}`;
+  return makeCard('🏗️', '招 5｜建築工程履歷', 'badge-link', '手動查詢', inner);
+}
+
+/* ── 招 6｜重大工安事件 ── */
+function c6(name) {
+  const inner = `
+    <div class="card-desc">
+      在職安署公開資料查詢營造廠工安紀錄<br>
+      工地管理鬆散，往往代表整體品質控管有問題
+    </div>
+    ${linkBtns([
+      ['↗ 職安署重大災害查詢',  'https://pacs.osha.gov.tw/'],
+      ['↗ Google 搜尋工安事故', `https://www.google.com/search?q="${enc(name)}" 工安 工地意外 職業災害`],
+    ])}`;
+  return makeCard('⛑️', '招 6｜重大工安事件', 'badge-link', '手動查詢', inner);
+}
+
+/* ── 招 7｜集團關係辨識 ── */
+function c7(co, name) {
+  const ceoName = co && co.Responsible_Name ? co.Responsible_Name : null;
+  const ceoHint = ceoName ? `
+    <div class="hint-box">
+      👤 負責人：<strong>${ceoName}</strong><br>
+      可至商工登記以負責人姓名查詢旗下所有公司，找出集團全貌
+    </div>` : '';
+
+  const buttons = [
+    ['↗ Google 搜尋集團關係', `https://www.google.com/search?q="${enc(name)}" 集團 子公司 關係企業`, false],
+  ];
+  if (ceoName) {
+    buttons.push(['↗ 查負責人旗下公司', `https://findbiz.nat.gov.tw/fts/query/QueryBar/queryBar.do`, true]);
+  }
+
+  const inner = `
+    <div class="card-desc">
+      建商常以子公司或品牌名銷售，查清楚背後集團才算做足功課<br>
+      確認母公司財務狀況，才是真正的關鍵
+    </div>
+    ${ceoHint}
+    ${linkBtns(buttons)}`;
+
+  return makeCard('🔍', '招 7｜集團關係辨識', 'badge-link', '手動查詢', inner);
+}
+
+/* ── Enter 鍵 ── */
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
