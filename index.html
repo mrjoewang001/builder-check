@@ -3,386 +3,541 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>建商背景七招查 | 喬王工具箱</title>
-<meta name="description" content="輸入建商名稱或統一編號，一次查清商工登記、公平會裁罰、司法判決、口碑評價、工程履歷、工安紀錄、集團關係七大風險指標">
+<title>建商風控查詢系統 | 喬王工具箱</title>
+<meta name="description" content="輸入建商名稱或統一編號，自動查詢七大風險指標，買房前做足功課">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #0b1520;
-  --card: #162535;
-  --blue: #4A9DD6;
-  --gold: #F5C518;
-  --text: #AECFE6;
-  --white: #FFFFFF;
-  --muted: rgba(174,207,230,0.45);
-  --border: rgba(74,157,214,0.2);
+  --indigo: #4f46e5;
+  --indigo-dark: #3730a3;
+  --indigo-light: #eef2ff;
+  --indigo-bg: #1e1b4b;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-600: #475569;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --green-border: #a7f3d0;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-border: #fecaca;
+  --blue: #2563eb;
+  --blue-bg: #eff6ff;
+  --blue-border: #bfdbfe;
+  --gray: #6b7280;
+  --gray-bg: #f9fafb;
+  --gray-border: #e5e7eb;
 }
 
 body {
-  background: var(--bg);
-  color: var(--white);
+  background: var(--slate-50);
+  color: var(--slate-900);
   font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   min-height: 100vh;
 }
 
 /* ── Header ── */
-.header {
-  background: linear-gradient(160deg, #0d1f32 0%, var(--bg) 100%);
-  padding: 60px 24px 52px;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
+.site-header {
+  background: white;
+  border-bottom: 1px solid var(--slate-200);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
 }
-.header-tag {
-  color: var(--blue);
-  font-size: 13px;
-  letter-spacing: 0.22em;
-  margin-bottom: 18px;
+.site-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.header-title {
-  font-size: 44px;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  background: var(--indigo);
+  color: white;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.logo-text {
+  font-size: 18px;
   font-weight: 900;
-  line-height: 1.2;
-  margin-bottom: 14px;
+  color: var(--slate-900);
+  letter-spacing: -0.02em;
 }
-.header-title em { font-style: normal; color: var(--gold); }
-.header-sub {
-  color: var(--text);
-  font-size: 17px;
-  line-height: 1.8;
+.logo-text span { color: var(--indigo); }
+.version-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--slate-100);
+  color: var(--slate-400);
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-/* ── Search ── */
-.search-wrap {
-  max-width: 680px;
-  margin: 44px auto 0;
-  padding: 0 24px;
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%);
+  padding: 64px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
-.search-box {
-  display: flex;
-  gap: 10px;
-  background: var(--card);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 8px 8px 22px;
-  transition: border-color 0.2s;
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(79,70,229,0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
-.search-box:focus-within { border-color: var(--blue); }
+.hero-inner { max-width: 800px; margin: 0 auto; position: relative; }
+.hero h1 {
+  font-size: 40px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+.hero p {
+  color: #a5b4fc;
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+/* ── Search Box ── */
+.search-form {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+}
 .search-input {
-  flex: 1;
-  background: none;
+  width: 100%;
+  padding: 20px 160px 20px 24px;
+  border-radius: 16px;
   border: none;
-  outline: none;
-  color: var(--white);
   font-size: 17px;
   font-family: inherit;
-  letter-spacing: 0.04em;
+  outline: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  color: var(--slate-900);
 }
-.search-input::placeholder { color: var(--muted); }
-.search-btn {
-  background: var(--blue);
-  color: var(--white);
+.search-input::placeholder { color: var(--slate-400); }
+.search-input:focus { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 4px rgba(99,102,241,0.3); }
+.search-submit {
+  position: absolute;
+  right: 8px; top: 8px; bottom: 8px;
+  background: var(--indigo);
+  color: white;
   border: none;
-  border-radius: 8px;
-  padding: 12px 28px;
-  font-size: 16px;
+  border-radius: 10px;
+  padding: 0 28px;
+  font-size: 15px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 8px;
   transition: background 0.2s;
   white-space: nowrap;
 }
-.search-btn:hover { background: #3a8dc6; }
-.search-btn:disabled { background: #2a4a5e; cursor: wait; }
+.search-submit:hover { background: var(--indigo-dark); }
+.search-submit:disabled { background: #6366f1; opacity: 0.7; cursor: wait; }
 .search-hint {
-  text-align: center;
-  color: var(--muted);
+  color: #818cf8;
   font-size: 13px;
-  margin-top: 10px;
-  letter-spacing: 0.04em;
+  margin-top: 12px;
+  letter-spacing: 0.03em;
 }
+
+/* ── Main content area ── */
+.main { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  opacity: 0.25;
+  user-select: none;
+}
+.empty-icon { font-size: 72px; margin-bottom: 16px; }
+.empty-text { font-size: 20px; font-weight: 800; color: var(--slate-400); }
 
 /* ── Loading ── */
-.loading-wrap {
+.loading-card {
   display: none;
+  background: white;
+  border-radius: 24px;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  padding: 56px 40px;
   text-align: center;
-  padding: 70px 24px;
-  color: var(--text);
+  margin-top: 40px;
 }
-.spinner {
-  width: 42px; height: 42px;
-  border: 3px solid var(--border);
-  border-top-color: var(--blue);
+.spinner-wrap {
+  position: relative;
+  width: 88px; height: 88px;
+  margin: 0 auto 28px;
+}
+.spinner-ring {
+  position: absolute; inset: 0;
+  border: 4px solid var(--indigo-light);
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-  margin: 0 auto 18px;
+}
+.spinner-arc {
+  position: absolute; inset: 0;
+  border: 4px solid var(--indigo);
+  border-radius: 50%;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+.spinner-icon {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.loading-step {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--slate-800);
+  margin-bottom: 8px;
+}
+.loading-sub {
+  font-size: 13px;
+  color: var(--slate-400);
+  font-style: italic;
+}
 
 /* ── Results ── */
-.results {
-  display: none;
-  max-width: 1080px;
-  margin: 0 auto 80px;
-  padding: 0 24px;
-}
-.results.show { display: block; }
+.results { display: none; margin-top: 40px; }
+.results.show { display: block; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Results header */
 .res-header {
-  text-align: center;
-  padding: 40px 0 32px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-.res-company { font-size: 30px; font-weight: 900; }
-.res-meta {
-  color: var(--blue);
-  font-size: 14px;
-  letter-spacing: 0.1em;
-  margin-top: 8px;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
 }
+.res-company-info {}
+.res-done {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--indigo);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.res-company-name {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--slate-900);
+}
+.res-tax { color: var(--slate-400); font-size: 13px; margin-top: 6px; }
 
-/* ── Card ── */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
+.risk-badge {
+  background: var(--slate-900);
+  color: white;
+  border-radius: 16px;
+  padding: 18px 28px;
+  display: flex; align-items: center; gap: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.risk-text-wrap { text-align: right; }
+.risk-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.risk-value { font-size: 22px; font-weight: 900; margin-top: 2px; }
+.risk-icon {
+  width: 52px; height: 52px;
   border-radius: 14px;
-  overflow: hidden;
-}
-.card-bar {
-  height: 4px;
-  background: linear-gradient(90deg, var(--blue), var(--gold));
-}
-.card-body { padding: 28px 30px 26px; }
-
-.card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 22px;
-}
-.card-title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.card-icon {
-  width: 42px; height: 42px;
-  background: rgba(74,157,214,0.12);
-  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 21px;
+  font-size: 26px;
 }
-.card-title { font-size: 17px; font-weight: 700; }
+.risk-low   { background: #10b981; }
+.risk-mid   { background: #f59e0b; }
+.risk-high  { background: #ef4444; }
 
-.badge {
-  font-size: 12px; font-weight: 600;
-  padding: 4px 12px; border-radius: 20px;
-  letter-spacing: 0.06em;
+/* Results card */
+.results-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  overflow: hidden;
+  margin-bottom: 20px;
 }
-.badge-live { background: rgba(74,214,141,0.12); color: #4AD68D; border: 1px solid rgba(74,214,141,0.3); }
-.badge-link { background: rgba(74,157,214,0.1); color: var(--blue); border: 1px solid var(--border); }
-.badge-warn { background: rgba(245,197,24,0.1); color: var(--gold); border: 1px solid rgba(245,197,24,0.3); }
 
-/* Data rows */
-.data-rows { margin-bottom: 18px; }
-.data-row {
+/* Result rows */
+.result-row {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(74,157,214,0.08);
+  gap: 24px;
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--slate-100);
+  transition: background 0.15s;
+  align-items: flex-start;
 }
-.data-row:last-child { border-bottom: none; }
-.dl { color: var(--muted); font-size: 13px; flex-shrink: 0; }
-.dv { font-size: 14px; font-weight: 500; text-align: right; word-break: break-all; }
-.dv.good { color: #4AD68D; }
-.dv.warn { color: var(--gold); }
-.dv.bad  { color: #F55A5A; }
+.result-row:last-child { border-bottom: none; }
+.result-row:hover { background: var(--slate-50); }
 
-/* Desc & hint */
-.card-desc {
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.85;
-  margin-bottom: 18px;
+.row-icon {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
 }
-.hint-box {
-  background: rgba(74,157,214,0.06);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.75;
-  margin-bottom: 18px;
-}
-.hint-box strong { color: var(--white); }
+.icon-success { background: var(--green-bg); }
+.icon-warning { background: var(--amber-bg); }
+.icon-danger  { background: var(--red-bg); }
+.icon-info    { background: var(--blue-bg); }
+.icon-pending { background: var(--gray-bg); }
 
-.api-error {
-  background: rgba(245,90,90,0.08);
-  border: 1px solid rgba(245,90,90,0.25);
-  border-radius: 8px;
-  padding: 13px 16px;
-  color: #f5a0a0;
-  font-size: 13px;
-  margin-bottom: 18px;
-  line-height: 1.7;
+.row-body { flex: 1; min-width: 0; }
+.row-title-wrap {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; margin-bottom: 10px;
 }
+.row-title { font-size: 18px; font-weight: 900; color: var(--slate-800); }
 
-/* Buttons */
-.link-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
-.lb {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(74,157,214,0.08);
-  border: 1px solid rgba(74,157,214,0.28);
-  color: var(--blue);
-  padding: 9px 16px; border-radius: 8px;
-  font-size: 13px; font-weight: 600;
-  text-decoration: none; letter-spacing: 0.04em;
-  transition: background 0.18s, border-color 0.18s;
-  cursor: pointer; font-family: inherit;
+.status-tag {
+  font-size: 12px; font-weight: 700;
+  padding: 3px 12px; border-radius: 20px;
+  border: 1px solid;
   white-space: nowrap;
 }
-.lb:hover { background: rgba(74,157,214,0.15); border-color: var(--blue); }
-.lb.gold {
-  background: rgba(245,197,24,0.07);
-  border-color: rgba(245,197,24,0.28);
-  color: var(--gold);
-}
-.lb.gold:hover { background: rgba(245,197,24,0.13); }
+.tag-success { color: var(--green);  background: var(--green-bg); border-color: var(--green-border); }
+.tag-warning { color: var(--amber);  background: var(--amber-bg); border-color: var(--amber-border); }
+.tag-danger  { color: var(--red);    background: var(--red-bg);   border-color: var(--red-border); }
+.tag-info    { color: var(--blue);   background: var(--blue-bg);  border-color: var(--blue-border); }
+.tag-pending { color: var(--gray);   background: var(--gray-bg);  border-color: var(--gray-border); }
 
-/* ── Footer ── */
-.footer {
-  text-align: center;
-  padding: 32px 24px;
-  color: var(--muted);
-  font-size: 13px;
-  border-top: 1px solid var(--border);
-  letter-spacing: 0.04em;
-  line-height: 1.9;
-}
-.footer a { color: var(--blue); text-decoration: none; }
+.row-content { color: var(--slate-600); font-size: 15px; line-height: 1.75; font-weight: 500; }
+.row-content strong { color: var(--slate-800); }
+.row-content .highlight-good { color: var(--green); font-weight: 700; }
+.row-content .highlight-warn { color: var(--amber); font-weight: 700; }
+.row-content .highlight-bad  { color: var(--red);   font-weight: 700; }
 
-/* ── 公司清單（招 7） ── */
+/* Sub data list inside content */
+.sub-data { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.sub-row { display: flex; gap: 12px; font-size: 14px; }
+.sub-label { color: var(--slate-400); flex-shrink: 0; width: 72px; }
+.sub-val { color: var(--slate-700); font-weight: 600; }
+
+/* Company list (招 7) */
 .co-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
-  max-height: 360px;
+  margin-top: 12px;
+  max-height: 280px;
   overflow-y: auto;
+  display: flex; flex-direction: column; gap: 5px;
   padding-right: 4px;
 }
 .co-list::-webkit-scrollbar { width: 4px; }
-.co-list::-webkit-scrollbar-track { background: transparent; }
-.co-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
+.co-list::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 2px; }
 .co-item {
-  background: rgba(74,157,214,0.05);
-  border: 1px solid rgba(74,157,214,0.14);
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
   border-radius: 8px;
-  padding: 10px 14px;
-  transition: background 0.15s;
+  padding: 9px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.co-item:hover { background: rgba(74,157,214,0.1); }
-.co-item.co-current {
-  background: rgba(74,157,214,0.12);
-  border-color: rgba(74,157,214,0.4);
-}
-.co-item.co-inactive { opacity: 0.48; }
-
-.co-item-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.co-name { font-size: 14px; font-weight: 600; color: var(--white); }
-.co-tag {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: rgba(74,157,214,0.15);
-  color: var(--blue);
+.co-item.is-current { background: var(--indigo-light); border-color: #c7d2fe; }
+.co-item.is-inactive { opacity: 0.45; }
+.co-name-wrap { display: flex; align-items: center; gap: 8px; }
+.co-name { font-size: 13px; font-weight: 700; color: var(--slate-800); }
+.co-mini-tag {
+  font-size: 11px; font-weight: 700;
+  padding: 1px 8px; border-radius: 10px;
   white-space: nowrap;
 }
-.co-tag.co-tag-off {
-  background: rgba(200,80,80,0.12);
-  color: #e08080;
-}
-.co-item-meta {
-  display: flex;
-  gap: 14px;
-  font-size: 12px;
-  color: var(--muted);
-}
+.co-mini-tag.querying { background: var(--indigo-light); color: var(--indigo); }
+.co-mini-tag.inactive { background: var(--red-bg); color: var(--red); }
+.co-meta { font-size: 12px; color: var(--slate-400); white-space: nowrap; }
 
-@media (max-width: 760px) {
-  .header-title { font-size: 30px; }
-  .cards-grid { grid-template-columns: 1fr; }
-  .card-body { padding: 22px 18px 20px; }
+.row-link {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--slate-400);
+  font-size: 13px; font-weight: 700;
+  background: var(--slate-100);
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.row-link:hover { background: var(--indigo-light); color: var(--indigo); }
+
+/* ── AI insight box ── */
+.ai-box {
+  background: var(--indigo-light);
+  border: 1px solid #c7d2fe;
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+.ai-box-icon {
+  background: var(--indigo);
+  color: white;
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.ai-box-title { font-size: 17px; font-weight: 900; color: #312e81; margin-bottom: 8px; }
+.ai-box-body { font-size: 15px; color: #3730a3; line-height: 1.75; font-weight: 500; }
+
+/* ── Footer ── */
+.footer {
+  background: white;
+  border-top: 1px solid var(--slate-200);
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--slate-400);
+  font-size: 13px;
+  line-height: 1.9;
+}
+.footer a { color: var(--indigo); text-decoration: none; }
+
+@media (max-width: 680px) {
+  .hero h1 { font-size: 26px; }
+  .search-input { padding: 16px 16px 16px 16px; font-size: 15px; }
+  .search-submit { position: static; width: 100%; margin-top: 10px; justify-content: center; padding: 14px; }
+  .search-form { display: flex; flex-direction: column; }
+  .res-header { flex-direction: column; align-items: flex-start; }
+  .result-row { flex-wrap: wrap; padding: 20px; }
+  .row-link { width: 100%; justify-content: center; }
+  .res-company-name { font-size: 26px; }
 }
 </style>
 </head>
 <body>
 
 <!-- ── Header ── -->
-<div class="header">
-  <div class="header-tag">▌ 喬王工具箱</div>
-  <h1 class="header-title">建商背景<em>七招查</em></h1>
-  <p class="header-sub">
-    輸入建商名稱或統一編號，一次查清七大風險指標<br>
-    買房前做足功課，避免踩到地雷建商
-  </p>
-  <div class="search-wrap">
-    <div class="search-box">
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">建商風控 <span>查詢系統</span></div>
+    </a>
+    <div class="version-badge">真實 API v2.0</div>
+  </div>
+</header>
+
+<!-- ── Hero + Search ── -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1>輸入建商資料<br>風險由系統為您掃描</h1>
+    <p>自動查詢七大風險指標，資料來自政府開放 API<br>買房前做足功課，避免踩到地雷建商</p>
+    <form class="search-form" onsubmit="handleSearch(event)">
       <input class="search-input" id="searchInput" type="text"
-        placeholder="輸入建商名稱 或 統一編號（8碼）" autocomplete="off">
-      <button class="search-btn" id="searchBtn" onclick="doSearch()">查詢</button>
+        placeholder="輸入統一編號（8碼）或建商全名" autocomplete="off">
+      <button class="search-submit" id="searchBtn" type="submit">
+        <span id="btnIcon">🔍</span>
+        <span id="btnText">啟動掃描</span>
+      </button>
+    </form>
+    <p class="search-hint">例：「03145666」「遠雄建設事業股份有限公司」</p>
+  </div>
+</section>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🗄</div>
+    <div class="empty-text">系統已準備就緒，請輸入查詢標的</div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-card" id="loadingCard">
+    <div class="spinner-wrap">
+      <div class="spinner-ring"></div>
+      <div class="spinner-arc"></div>
+      <div class="spinner-icon">🔍</div>
     </div>
-    <p class="search-hint">例：「遠雄建設」或「03145666」</p>
+    <div class="loading-step" id="loadingStep">正在連線政府資料庫…</div>
+    <div class="loading-sub">資料來源：經濟部商業司開放 API</div>
   </div>
-</div>
 
-<!-- ── Loading ── -->
-<div class="loading-wrap" id="loadingWrap">
-  <div class="spinner"></div>
-  <p>查詢政府開放資料中，請稍候…</p>
-</div>
+  <!-- Results -->
+  <div class="results" id="resultsSection">
 
-<!-- ── Results ── -->
-<div class="results" id="resultsSection">
-  <div class="res-header">
-    <div class="res-company" id="resName">—</div>
-    <div class="res-meta" id="resMeta">—</div>
+    <!-- 公司名稱 + 風險評級 -->
+    <div class="res-header">
+      <div class="res-company-info">
+        <div class="res-done">✅ 掃描完成</div>
+        <div class="res-company-name" id="resName">—</div>
+        <div class="res-tax" id="resTax"></div>
+      </div>
+      <div class="risk-badge" id="riskBadge">
+        <div class="risk-text-wrap">
+          <div class="risk-label">風險評估（基本資料）</div>
+          <div class="risk-value" id="riskValue">—</div>
+        </div>
+        <div class="risk-icon" id="riskIcon">🛡</div>
+      </div>
+    </div>
+
+    <!-- 7 張結果卡片 -->
+    <div class="results-card" id="resultsCard">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- AI insight -->
+    <div class="ai-box" id="aiBox" style="display:none;">
+      <div class="ai-box-icon">💡</div>
+      <div>
+        <div class="ai-box-title">查詢建議</div>
+        <div class="ai-box-body" id="aiBoxBody"></div>
+      </div>
+    </div>
+
   </div>
-  <div class="cards-grid" id="cardsGrid"></div>
 </div>
 
 <!-- ── Footer ── -->
-<div class="footer">
-  資料來源：經濟部商業司、公平交易委員會、司法院、內政部建管、勞動部職安署<br>
-  本工具僅供參考，買房前請務必實地查核 ｜
+<footer class="footer">
+  資料來源：經濟部商業司（即時 API）、公平交易委員會、司法院、內政部建管署、勞動部職安署<br>
+  本工具僅供購屋前參考，實際狀況請以政府公告與實地查核為準 ｜
   <a href="https://mrjoewang.com/construction-company-good-or-bad/" target="_blank">延伸閱讀：建商怎麼查？</a>
   ｜ <a href="https://mrjoewang.com" target="_blank">喬王的房產理財</a>
-</div>
+</footer>
 
 <script>
-/* ── 工具函數 ── */
 const enc = s => encodeURIComponent(s);
-
 function isTaxId(s) { return /^\d{8}$/.test(s.trim()); }
 
 function formatCapital(n) {
@@ -392,12 +547,6 @@ function formatCapital(n) {
   return Math.round(num / 10000).toLocaleString() + ' 萬元';
 }
 
-function capitalClass(n) {
-  const num = parseInt(n);
-  if (isNaN(num) || !n) return '';
-  return num >= 25000000 ? 'good' : 'warn';
-}
-
 function yearsSince(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -405,261 +554,290 @@ function yearsSince(dateStr) {
   return Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24 * 365.25));
 }
 
-/* ── 主查詢 ── */
-async function doSearch() {
+/* ── 主搜尋 ── */
+async function handleSearch(e) {
+  e.preventDefault();
   const raw = document.getElementById('searchInput').value.trim();
-  if (!raw) { document.getElementById('searchInput').focus(); return; }
+  if (!raw) return;
 
-  const btn = document.getElementById('searchBtn');
-  btn.disabled = true;
-  document.getElementById('loadingWrap').style.display = 'block';
+  // UI reset
+  document.getElementById('emptyState').style.display = 'none';
   document.getElementById('resultsSection').classList.remove('show');
+  document.getElementById('loadingCard').style.display = 'block';
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('btnText').textContent = '掃描中…';
 
-  let co = null, apiError = null, relatedCos = [];
+  const steps = [
+    '正在連線經濟部商業司 API…',
+    '讀取公司登記基本資料…',
+    '比對負責人名下公司清單…',
+    '整合六大查詢管道…',
+    '產生風險評估報告…',
+  ];
+
+  let stepIdx = 0;
+  const stepEl = document.getElementById('loadingStep');
+  stepEl.textContent = steps[0];
+  const stepTimer = setInterval(() => {
+    stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+    stepEl.textContent = steps[stepIdx];
+  }, 700);
+
+  let co = null, relatedCos = [], apiError = false;
+
   try {
     const isId = isTaxId(raw);
     const filter = isId
       ? `Business_Account_No eq '${raw}'`
       : `startswith(Company_Name,'${raw}') eq true`;
-    const url = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${encodeURIComponent(filter)}&$skip=0&$top=1`;
+    const url = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${enc(filter)}&$skip=0&$top=1`;
     const res = await fetch(url);
     const data = await res.json();
     co = (data && data.length > 0) ? data[0] : null;
 
     if (co && co.Responsible_Name) {
-      document.getElementById('loadingWrap').querySelector('p').textContent =
-        `查詢 ${co.Responsible_Name} 名下公司中…`;
+      stepEl.textContent = `查詢 ${co.Responsible_Name} 名下公司…`;
       const ceoFilter = `Responsible_Name eq '${co.Responsible_Name}'`;
-      const relUrl = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${encodeURIComponent(ceoFilter)}&$skip=0&$top=100`;
+      const relUrl = `https://data.gcis.nat.gov.tw/od/data/api/236EE382-4942-41A9-BD03-CA0709025E7C?$format=json&$filter=${enc(ceoFilter)}&$skip=0&$top=100`;
       const relRes = await fetch(relUrl);
       const relData = await relRes.json();
       relatedCos = Array.isArray(relData) ? relData : [];
     }
-  } catch (e) {
-    apiError = '政府 API 暫時無回應，即時資料無法顯示，查詢連結仍可使用。';
+  } catch(err) {
+    apiError = true;
   }
 
-  document.getElementById('loadingWrap').style.display = 'none';
-  btn.disabled = false;
-  render(raw, co, apiError, relatedCos);
+  clearInterval(stepTimer);
+  document.getElementById('loadingCard').style.display = 'none';
+  document.getElementById('searchBtn').disabled = false;
+  document.getElementById('btnText').textContent = '啟動掃描';
+  renderResults(raw, co, relatedCos, apiError);
 }
 
-/* ── 渲染 ── */
-function render(input, co, apiError, relatedCos) {
+/* ── 渲染結果 ── */
+function renderResults(input, co, relatedCos, apiError) {
   const name  = co ? co.Company_Name : input;
   const taxId = co ? co.Business_Account_No : (isTaxId(input) ? input : '');
 
   document.getElementById('resName').textContent = name;
-  document.getElementById('resMeta').textContent = taxId
+  document.getElementById('resTax').textContent = taxId
     ? `統一編號：${taxId}`
-    : (!co ? '未找到商業司登記資料（請確認全名或嘗試輸入統編）' : '');
+    : '（未找到商業司登記資料，以下查詢連結仍可使用）';
 
-  const grid = document.getElementById('cardsGrid');
-  grid.innerHTML = '';
-  [c1(co, apiError, name), c2(name), c3(name), c4(name), c5(name), c6(name), c7(co, name, relatedCos)]
-    .forEach(el => grid.appendChild(el));
+  // 風險評分
+  const { riskLabel, riskClass, riskEmoji } = calcRisk(co, apiError);
+  document.getElementById('riskValue').textContent = riskLabel;
+  const ri = document.getElementById('riskIcon');
+  ri.textContent = riskEmoji;
+  ri.className = `risk-icon ${riskClass}`;
+
+  // 產生 7 列
+  const card = document.getElementById('resultsCard');
+  card.innerHTML = [
+    row1(co, apiError, name),
+    row2(name),
+    row3(name),
+    row4(name),
+    row5(name),
+    row6(name),
+    row7(co, name, relatedCos),
+  ].join('');
+
+  // AI 建議
+  renderAiBox(co, name, relatedCos);
 
   document.getElementById('resultsSection').classList.add('show');
   document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ── 建立卡片的通用包裝 ── */
-function makeCard(iconEmoji, titleText, badgeClass, badgeLabel, innerHtml) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `
-    <div class="card-bar"></div>
-    <div class="card-body">
-      <div class="card-head">
-        <div class="card-title-row">
-          <div class="card-icon">${iconEmoji}</div>
-          <div class="card-title">${titleText}</div>
+/* ── 風險計算 ── */
+function calcRisk(co, apiError) {
+  if (apiError || !co) return { riskLabel: '無法評估', riskClass: 'risk-high', riskEmoji: '❓' };
+  const active = co.Company_Status === '01';
+  const cap    = parseInt(co.Capital_Stock_Amount || 0);
+  const years  = yearsSince(co.Date_Approved);
+  if (!active) return { riskLabel: '較高風險', riskClass: 'risk-high', riskEmoji: '⚠️' };
+  if (cap < 25000000 || years < 3) return { riskLabel: '中等風險', riskClass: 'risk-mid', riskEmoji: '🔶' };
+  return { riskLabel: '低風險（基本面）', riskClass: 'risk-low', riskEmoji: '✅' };
+}
+
+/* ── 共用 HTML 組件 ── */
+function makeRow(iconEmoji, iconClass, title, tagClass, tagLabel, content, linkLabel, linkUrl) {
+  return `
+    <div class="result-row">
+      <div class="row-icon ${iconClass}">${iconEmoji}</div>
+      <div class="row-body">
+        <div class="row-title-wrap">
+          <div class="row-title">${title}</div>
+          <span class="status-tag ${tagClass}">${tagLabel}</span>
         </div>
-        <span class="badge ${badgeClass}">${badgeLabel}</span>
+        <div class="row-content">${content}</div>
       </div>
-      ${innerHtml}
+      <a class="row-link" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel} ↗</a>
     </div>`;
-  return card;
-}
-
-function row(label, val, cls) {
-  return `<div class="data-row"><span class="dl">${label}</span><span class="dv ${cls||''}">${val}</span></div>`;
-}
-
-function linkBtns(buttons) {
-  return `<div class="link-buttons">${buttons.map(([label, href, gold]) =>
-    `<a class="lb ${gold ? 'gold' : ''}" href="${href}" target="_blank" rel="noopener">${label}</a>`
-  ).join('')}</div>`;
 }
 
 /* ── 招 1｜商工登記 ── */
-function c1(co, apiError, name) {
-  let inner = '';
+function row1(co, apiError, name) {
+  let tagClass, tagLabel, content;
   if (apiError) {
-    inner = `<div class="api-error">⚠️ ${apiError}</div>`;
+    tagClass = 'tag-warning'; tagLabel = 'API 暫時無回應';
+    content = `政府開放 API 目前無法連線，請直接至商工登記公示系統手動查詢。`;
   } else if (!co) {
-    inner = `<div class="api-error">找不到「${name}」的商業司登記資料。<br>可能是品牌名或子公司名，請嘗試輸入母公司全名或統一編號。</div>`;
+    tagClass = 'tag-warning'; tagLabel = '查無資料';
+    content = `找不到「${name}」的商業司登記資料，可能是品牌名或子公司名，請嘗試輸入母公司全名或統一編號。`;
   } else {
-    const years = yearsSince(co.Date_Approved);
-    const ySt   = years === null ? '' : years >= 3 ? 'good' : 'warn';
-    const capSt = capitalClass(co.Capital_Stock_Amount);
-    const statusOk = co.Company_Status === '01';
+    const years  = yearsSince(co.Date_Approved);
+    const cap    = parseInt(co.Capital_Stock_Amount || 0);
+    const active = co.Company_Status === '01';
+    const capOk  = cap >= 25000000;
+    const yearOk = years >= 3;
+    const allOk  = active && capOk && yearOk;
+    tagClass = allOk ? 'tag-success' : 'tag-warning';
+    tagLabel = allOk ? '無異常 (Cleared)' : '需注意 (Flagged)';
 
-    inner = `
-      <div class="data-rows">
-        ${row('公司全名', co.Company_Name || '—')}
-        ${row('統一編號', co.Business_Account_No || '—')}
-        ${row('負責人',   co.Responsible_Name || '—')}
-        ${row('成立日期', co.Date_Approved
-            ? `${co.Date_Approved}${years !== null ? `（${years} 年）` : ''}` : '—', ySt)}
-        ${row('資本額',   formatCapital(co.Capital_Stock_Amount), capSt)}
-        ${row('公司狀態', statusOk ? '正常營業 ✓' : (co.Company_Status || '—'),
-                          statusOk ? 'good' : 'warn')}
-        ${row('登記地址', co.Company_Location || '—')}
-      </div>
-      <div class="hint-box">
-        ✅ 資本額 <strong>2,500 萬以上</strong>、成立 <strong>3 年以上</strong>為基本門檻<br>
-        🟡 黃色 = 低於門檻，需進一步確認　🟢 綠色 = 符合
+    const capStr  = formatCapital(co.Capital_Stock_Amount);
+    const capCls  = capOk  ? 'highlight-good' : 'highlight-warn';
+    const yearCls = yearOk ? 'highlight-good' : 'highlight-warn';
+    const statCls = active ? 'highlight-good' : 'highlight-bad';
+
+    content = `
+      <div class="sub-data">
+        <div class="sub-row"><span class="sub-label">負責人</span><span class="sub-val">${co.Responsible_Name || '—'}</span></div>
+        <div class="sub-row"><span class="sub-label">成立日期</span><span class="sub-val"><span class="${yearCls}">${co.Date_Approved || '—'}${years !== null ? `（${years} 年）` : ''}</span></span></div>
+        <div class="sub-row"><span class="sub-label">資本額</span><span class="sub-val"><span class="${capCls}">${capStr}</span>${!capOk ? '　⚠ 低於 2,500 萬門檻' : ''}</span></div>
+        <div class="sub-row"><span class="sub-label">公司狀態</span><span class="sub-val"><span class="${statCls}">${active ? '正常營業 ✓' : co.Company_Status || '—'}</span></span></div>
+        <div class="sub-row"><span class="sub-label">地址</span><span class="sub-val">${co.Company_Location || '—'}</span></div>
       </div>`;
   }
-
-  inner += linkBtns([['↗ 商工登記公示系統', 'https://findbiz.nat.gov.tw/fts/query/QueryBar/queryBar.do']]);
-
-  return makeCard('🏢', '招 1｜商工登記', co ? 'badge-live' : 'badge-warn',
-    co ? '即時資料' : '手動查詢', inner);
+  return makeRow('🏢','icon-success','工商登記資料',tagClass,tagLabel,content,
+    '開啟原始資料','https://findbiz.nat.gov.tw/fts/query/QueryBar/queryBar.do');
 }
 
 /* ── 招 2｜公平交易委員會 ── */
-function c2(name) {
-  const inner = `
-    <div class="card-desc">
-      查詢建商是否曾遭公平會裁罰「不實廣告」<br>
-      有裁罰紀錄不代表建商一定爛，但值得進一步了解
-    </div>
-    ${linkBtns([
-      ['↗ Google 搜尋裁罰紀錄', `https://www.google.com/search?q="${enc(name)}" 公平交易委員會 裁罰 不實廣告`],
-      ['↗ 公平會官網查詢',     'https://www.ftc.gov.tw/internet/main/doc/docList.aspx?uid=138'],
-    ])}`;
-  return makeCard('⚖️', '招 2｜公平交易委員會', 'badge-link', '手動查詢', inner);
+function row2(name) {
+  return makeRow('⚖️','icon-pending','公平會裁罰紀錄','tag-pending','待確認 (Manual)',
+    `請至公平交易委員會官網查詢「<strong>${name}</strong>」是否曾遭裁罰「不實廣告」。<br>有裁罰紀錄不代表建商一定有問題，但值得進一步了解。`,
+    '開啟公平會查詢',`https://www.google.com/search?q="${enc(name)}" 公平交易委員會 裁罰 不實廣告`);
 }
 
-/* ── 招 3｜司法院判決書 ── */
-function c3(name) {
-  const inner = `
-    <div class="card-desc">
-      在司法院法學資料系統輸入建商名稱<br>
-      看有無「購屋糾紛、工程瑕疵」相關民事訴訟紀錄
-    </div>
-    ${linkBtns([
-      ['↗ 司法院判決查詢系統',  'https://judgment.judicial.gov.tw/FJUD/default.aspx'],
-      ['↗ Google 搜尋訴訟紀錄', `https://www.google.com/search?q="${enc(name)}" 訴訟 判決 購屋糾紛 工程瑕疵`],
-    ])}`;
-  return makeCard('📋', '招 3｜司法院判決書', 'badge-link', '手動查詢', inner);
+/* ── 招 3｜司法院 ── */
+function row3(name) {
+  return makeRow('📋','icon-pending','司法判決書','tag-pending','待確認 (Manual)',
+    `請至司法院法學資料系統搜尋「<strong>${name}</strong>」，查有無購屋糾紛、工程瑕疵相關民事訴訟。<br>訴訟件數多寡不代表絕對好壞，需判斷訴訟性質。`,
+    '開啟司法院查詢','https://judgment.judicial.gov.tw/FJUD/default.aspx');
 }
 
-/* ── 招 4｜售後口碑觀察 ── */
-function c4(name) {
-  const inner = `
-    <div class="card-desc">
-      看住戶實際使用後的評價，特別注意保固期內出問題時<br>建商有沒有出現、處理態度如何
-    </div>
-    ${linkBtns([
-      ['↗ Mobile01 討論',   `https://www.google.com/search?q="${enc(name)}" site:mobile01.com`],
-      ['↗ PTT 討論',        `https://www.google.com/search?q="${enc(name)}" site:ptt.cc`],
-      ['↗ Google 評價搜尋', `https://www.google.com/search?q="${enc(name)}" 評價 保固 住戶 心得`, true],
-    ])}`;
-  return makeCard('💬', '招 4｜售後口碑觀察', 'badge-link', '手動查詢', inner);
+/* ── 招 4｜售後口碑 ── */
+function row4(name) {
+  return makeRow('💬','icon-pending','社群口碑評價','tag-pending','待確認 (Manual)',
+    `請於 Mobile01、PTT、Facebook 房產社團搜尋「<strong>${name}</strong>」實際住戶評價。<br>重點：出問題後建商有沒有出現？保固處理速度如何？`,
+    'Google 搜尋評價',`https://www.google.com/search?q="${enc(name)}" 評價 保固 住戶 心得`);
 }
 
 /* ── 招 5｜建築工程履歷 ── */
-function c5(name) {
-  const inner = `
-    <div class="card-desc">
-      查詢建商過往建案數量與建照、使照申請進度<br>
-      過去蓋過幾棟？有沒有工程延宕或爛尾的紀錄？
-    </div>
-    ${linkBtns([
-      ['↗ 內政部建築履歷查詢',  'https://cpabm.cpami.gov.tw/cers/Welcome.do'],
-      ['↗ Google 搜尋建案紀錄', `https://www.google.com/search?q="${enc(name)}" 建案 建照 使照 完工`],
-    ])}`;
-  return makeCard('🏗️', '招 5｜建築工程履歷', 'badge-link', '手動查詢', inner);
+function row5(name) {
+  return makeRow('🏗️','icon-pending','建築工程履歷','tag-pending','待確認 (Manual)',
+    `請至內政部建築工程公開系統查詢「<strong>${name}</strong>」過往建案數量與建照、使照紀錄。<br>了解建商蓋過幾棟、有無工程延宕或爛尾。`,
+    '開啟建築履歷系統','https://cpabm.cpami.gov.tw/cers/Welcome.do');
 }
 
-/* ── 招 6｜重大工安事件 ── */
-function c6(name) {
-  const inner = `
-    <div class="card-desc">
-      在職安署公開資料查詢營造廠工安紀錄<br>
-      工地管理鬆散，往往代表整體品質控管有問題
-    </div>
-    ${linkBtns([
-      ['↗ 職安署重大災害查詢',  'https://pacs.osha.gov.tw/'],
-      ['↗ Google 搜尋工安事故', `https://www.google.com/search?q="${enc(name)}" 工安 工地意外 職業災害`],
-    ])}`;
-  return makeCard('⛑️', '招 6｜重大工安事件', 'badge-link', '手動查詢', inner);
+/* ── 招 6｜工安事件 ── */
+function row6(name) {
+  return makeRow('⛑️','icon-pending','重大工安事件','tag-pending','待確認 (Manual)',
+    `請至勞動部職安署公開資料查詢「<strong>${name}</strong>」工地工安紀錄。<br>工地管理鬆散往往代表整體品質控管有問題。`,
+    '開啟職安署查詢','https://pacs.osha.gov.tw/');
 }
 
-/* ── 招 7｜集團關係辨識 ── */
-function c7(co, name, relatedCos) {
+/* ── 招 7｜集團關係 ── */
+function row7(co, name, relatedCos) {
   const ceoName = co && co.Responsible_Name ? co.Responsible_Name : null;
   const hasData = relatedCos && relatedCos.length > 0;
 
-  let listHtml = '';
-  if (hasData) {
-    const sorted = [...relatedCos].sort((a, b) => {
-      const aActive = a.Company_Status === '01';
-      const bActive = b.Company_Status === '01';
-      if (aActive !== bActive) return aActive ? -1 : 1;
-      return parseInt(b.Capital_Stock_Amount || 0) - parseInt(a.Capital_Stock_Amount || 0);
-    });
-    const activeCount = sorted.filter(c => c.Company_Status === '01').length;
+  let content = '';
 
-    listHtml = `
-      <div class="hint-box" style="margin-bottom:14px;">
-        👤 負責人 <strong>${ceoName}</strong> 名下共 <strong>${relatedCos.length}</strong> 家公司
-        （${activeCount} 家正常營業、${relatedCos.length - activeCount} 家已停業）
-      </div>
+  if (hasData) {
+    const sorted = [...relatedCos].sort((a,b) => {
+      const aA = a.Company_Status==='01', bA = b.Company_Status==='01';
+      if (aA !== bA) return aA ? -1 : 1;
+      return parseInt(b.Capital_Stock_Amount||0) - parseInt(a.Capital_Stock_Amount||0);
+    });
+    const activeCount = sorted.filter(c => c.Company_Status==='01').length;
+    content = `
+      負責人 <strong>${ceoName}</strong> 名下共
+      <span class="highlight-good">${relatedCos.length} 家公司</span>
+      （${activeCount} 家正常營業、${relatedCos.length-activeCount} 家已停業）
       <div class="co-list">
         ${sorted.map(c => {
-          const isActive = c.Company_Status === '01';
-          const isCurrent = c.Business_Account_No === co.Business_Account_No;
+          const isCurrent  = c.Business_Account_No === co.Business_Account_No;
+          const isInactive = c.Company_Status !== '01';
           return `
-            <div class="co-item ${isCurrent ? 'co-current' : ''} ${!isActive ? 'co-inactive' : ''}">
-              <div class="co-item-main">
+            <div class="co-item ${isCurrent ? 'is-current' : ''} ${isInactive ? 'is-inactive' : ''}">
+              <div class="co-name-wrap">
                 <span class="co-name">${c.Company_Name}</span>
-                ${isCurrent ? '<span class="co-tag">查詢中</span>' : ''}
-                ${!isActive ? '<span class="co-tag co-tag-off">已停業</span>' : ''}
+                ${isCurrent  ? '<span class="co-mini-tag querying">查詢中</span>' : ''}
+                ${isInactive ? '<span class="co-mini-tag inactive">已停業</span>' : ''}
               </div>
-              <div class="co-item-meta">
-                <span>${c.Business_Account_No}</span>
-                <span>${formatCapital(c.Capital_Stock_Amount)}</span>
-                ${c.Date_Approved ? `<span>成立 ${c.Date_Approved.slice(0,4)}</span>` : ''}
-              </div>
+              <span class="co-meta">${c.Business_Account_No} ｜ ${formatCapital(c.Capital_Stock_Amount)}</span>
             </div>`;
         }).join('')}
       </div>`;
-  } else if (ceoName && co) {
-    listHtml = `<div class="hint-box">👤 負責人：<strong>${ceoName}</strong><br>未查到其他登記公司</div>`;
+  } else if (ceoName) {
+    content = `負責人 <strong>${ceoName}</strong>，未查到其他登記公司。`;
+  } else {
+    content = `請以建商名稱搜尋集團架構與關係企業，確認母公司財務狀況才是真正的關鍵。`;
   }
 
-  const inner = `
-    <div class="card-desc">
-      建商常以子公司或品牌名銷售，查清楚背後集團才算做足功課<br>確認母公司財務狀況，才是真正的關鍵
-    </div>
-    ${listHtml}
-    ${linkBtns([
-      ['↗ Google 搜尋集團關係', `https://www.google.com/search?q="${enc(name)}" 集團 子公司 關係企業`, false],
-    ])}`;
-
-  return makeCard('🔍', '招 7｜集團關係辨識',
-    hasData ? 'badge-live' : 'badge-link',
-    hasData ? `即時資料（${relatedCos.length} 家）` : '手動查詢',
-    inner);
+  return makeRow('🔍',
+    hasData ? 'icon-info' : 'icon-pending',
+    '集團架構關係',
+    hasData ? 'tag-info' : 'tag-pending',
+    hasData ? `即時資料（${relatedCos.length} 家）` : '待確認 (Manual)',
+    content,
+    'Google 搜尋集團關係',
+    `https://www.google.com/search?q="${enc(name)}" 集團 子公司 關係企業`
+  );
 }
 
-/* ── Enter 鍵 ── */
+/* ── AI 建議 ── */
+function renderAiBox(co, name, relatedCos) {
+  const box  = document.getElementById('aiBox');
+  const body = document.getElementById('aiBoxBody');
+  if (!co) {
+    box.style.display = 'none';
+    return;
+  }
+  const cap   = parseInt(co.Capital_Stock_Amount || 0);
+  const years = yearsSince(co.Date_Approved);
+  const active = co.Company_Status === '01';
+  const coCnt = relatedCos.length;
+
+  let advice = `根據商業司開放資料，「${co.Company_Name}」`;
+  if (!active) {
+    advice += `目前登記狀態<strong>非正常營業</strong>，建議進一步確認是否仍有實際業務運作，再考慮是否簽約購屋。`;
+  } else {
+    const issues = [];
+    if (cap < 25000000) issues.push('資本額低於 2,500 萬門檻');
+    if (years !== null && years < 3) issues.push(`成立未滿 3 年（${years} 年）`);
+    if (issues.length > 0) {
+      advice += `基本資料有注意事項：<strong>${issues.join('、')}</strong>。`;
+      advice += `建議優先完成招 3（司法判決）與招 4（口碑評價）的手動確認。`;
+    } else {
+      advice += `商業司基本資料表現正常。`;
+      advice += `建議進一步手動確認招 2（公平會裁罰）與招 4（住戶口碑），以取得更完整的風險樣貌。`;
+    }
+    if (coCnt > 5) {
+      advice += `此外，負責人名下有 <strong>${coCnt} 家公司</strong>，集團規模較大，可確認主體公司與銷售個案的關係。`;
+    }
+  }
+
+  body.innerHTML = advice;
+  box.style.display = 'flex';
+}
+
+/* ── Enter ── */
 document.getElementById('searchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
+  if (e.key === 'Enter') handleSearch(e);
 });
 </script>
 </body>
