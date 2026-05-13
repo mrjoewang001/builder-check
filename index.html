@@ -571,7 +571,7 @@ async function handleSearch(e) {
     '正在連線經濟部商業司 API…',
     '讀取公司登記基本資料…',
     '比對負責人名下公司清單…',
-    '整合六大查詢管道…',
+    '查詢職安署重大職業災害紀錄…',
     '產生風險評估報告…',
   ];
 
@@ -583,7 +583,7 @@ async function handleSearch(e) {
     stepEl.textContent = steps[stepIdx];
   }, 700);
 
-  let co = null, relatedCos = [], apiError = false;
+  let co = null, relatedCos = [], oshaData = null, apiError = false;
 
   try {
     const isId = isTaxId(raw);
@@ -607,15 +607,35 @@ async function handleSearch(e) {
     apiError = true;
   }
 
+  // 職安署 API（獨立 try-catch，CORS 失敗不影響其他結果）
+  try {
+    const searchName = co ? co.Company_Name : raw;
+    stepEl.textContent = `查詢職安署工安紀錄…`;
+    const oshaUrl = `https://pacs.osha.gov.tw/api/v1/getdangerocupation?info_q=${enc(searchName)}&info_Sort=eventDate&info_OrderBy=desc`;
+    const oshaRes = await fetch(oshaUrl);
+    const oshaJson = await oshaRes.json();
+    const all = Array.isArray(oshaJson) ? oshaJson
+               : (Array.isArray(oshaJson?.data) ? oshaJson.data : []);
+    // 優先以統編精確比對，否則退回名稱搜尋結果
+    if (co?.Business_Account_No) {
+      const exact = all.filter(r => r.institutionNo === co.Business_Account_No);
+      oshaData = exact.length > 0 ? exact : all;
+    } else {
+      oshaData = all;
+    }
+  } catch(e) {
+    oshaData = null; // CORS 或連線失敗，退回連結模式
+  }
+
   clearInterval(stepTimer);
   document.getElementById('loadingCard').style.display = 'none';
   document.getElementById('searchBtn').disabled = false;
   document.getElementById('btnText').textContent = '啟動掃描';
-  renderResults(raw, co, relatedCos, apiError);
+  renderResults(raw, co, relatedCos, oshaData, apiError);
 }
 
 /* ── 渲染結果 ── */
-function renderResults(input, co, relatedCos, apiError) {
+function renderResults(input, co, relatedCos, oshaData, apiError) {
   const name  = co ? co.Company_Name : input;
   const taxId = co ? co.Business_Account_No : (isTaxId(input) ? input : '');
 
@@ -625,7 +645,7 @@ function renderResults(input, co, relatedCos, apiError) {
     : '（未找到商業司登記資料，以下查詢連結仍可使用）';
 
   // 風險評分
-  const { riskLabel, riskClass, riskEmoji } = calcRisk(co, apiError);
+  const { riskLabel, riskClass, riskEmoji } = calcRisk(co, apiError, oshaData);
   document.getElementById('riskValue').textContent = riskLabel;
   const ri = document.getElementById('riskIcon');
   ri.textContent = riskEmoji;
@@ -639,24 +659,30 @@ function renderResults(input, co, relatedCos, apiError) {
     row3(name),
     row4(name),
     row5(name),
-    row6(name),
+    row6(name, oshaData),
     row7(co, name, relatedCos),
   ].join('');
 
   // AI 建議
-  renderAiBox(co, name, relatedCos);
+  renderAiBox(co, name, relatedCos, oshaData);
 
   document.getElementById('resultsSection').classList.add('show');
   document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* ── 風險計算 ── */
-function calcRisk(co, apiError) {
+function calcRisk(co, apiError, oshaData) {
   if (apiError || !co) return { riskLabel: '無法評估', riskClass: 'risk-high', riskEmoji: '❓' };
   const active = co.Company_Status === '01';
   const cap    = parseInt(co.Capital_Stock_Amount || 0);
   const years  = yearsSince(co.Date_Approved);
   if (!active) return { riskLabel: '較高風險', riskClass: 'risk-high', riskEmoji: '⚠️' };
+  // 有工安死亡紀錄 → 直接較高風險
+  if (oshaData && oshaData.length > 0) {
+    const deaths = oshaData.reduce((s, r) => s + (parseInt(r.death) || 0), 0);
+    if (deaths > 0) return { riskLabel: '較高風險', riskClass: 'risk-high', riskEmoji: '⚠️' };
+    return { riskLabel: '中等風險', riskClass: 'risk-mid', riskEmoji: '🔶' };
+  }
   if (cap < 25000000 || years < 3) return { riskLabel: '中等風險', riskClass: 'risk-mid', riskEmoji: '🔶' };
   return { riskLabel: '低風險（基本面）', riskClass: 'risk-low', riskEmoji: '✅' };
 }
@@ -743,10 +769,57 @@ function row5(name) {
 }
 
 /* ── 招 6｜工安事件 ── */
-function row6(name) {
-  return makeRow('⛑️','icon-pending','重大工安事件','tag-pending','待確認 (Manual)',
-    `請至勞動部職安署公開資料查詢「<strong>${name}</strong>」工地工安紀錄。<br>工地管理鬆散往往代表整體品質控管有問題。`,
-    '開啟職安署查詢','https://pacs.osha.gov.tw/');
+function row6(name, oshaData) {
+  // CORS 失敗或 API 連線不到
+  if (oshaData === null) {
+    return makeRow('⛑️','icon-pending','重大工安事件','tag-pending','待確認 (Manual)',
+      `職安署 API 無法從瀏覽器直接讀取，請點右方連結至官網手動搜尋「<strong>${name}</strong>」。`,
+      '開啟職安署查詢','https://pacs.osha.gov.tw/');
+  }
+
+  // 無紀錄
+  if (oshaData.length === 0) {
+    return makeRow('⛑️','icon-success','重大工安事件','tag-success','無異常 (Cleared)',
+      `以「<strong>${name}</strong>」查詢職安署重大職業災害公開資料庫，<span class="highlight-good">無相關紀錄</span>。<br>
+       <small style="color:var(--slate-400)">注意：工程現場事故可能登記在承造廠商名下，非絕對排除</small>`,
+      '開啟職安署查詢','https://pacs.osha.gov.tw/');
+  }
+
+  // 有紀錄
+  const totalDeaths = oshaData.reduce((s, r) => s + (parseInt(r.death) || 0), 0);
+  const hasDeaths = totalDeaths > 0;
+  const tagClass = hasDeaths ? 'tag-danger' : 'tag-warning';
+  const tagLabel = hasDeaths ? `高風險 (Alert)` : `需注意 (Flagged)`;
+  const iconClass = hasDeaths ? 'icon-danger' : 'icon-warning';
+
+  const rows = oshaData.slice(0, 8).map(r => {
+    const date = r.eventDate ? r.eventDate.slice(0, 10) : '—';
+    const dead = parseInt(r.death) || 0;
+    const type = r.disasterType || r.industry || '—';
+    const loc  = r.address || r.location || '—';
+    return `
+      <div class="co-item ${dead > 0 ? '' : ''}">
+        <div class="co-name-wrap" style="flex-direction:column;align-items:flex-start;gap:2px;">
+          <span class="co-name">${type}</span>
+          <span style="font-size:12px;color:var(--slate-400);">${loc}</span>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:12px;color:var(--slate-400);">${date}</div>
+          ${dead > 0 ? `<div style="font-size:12px;font-weight:700;color:var(--red);">死亡 ${dead} 人</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  const moreNote = oshaData.length > 8
+    ? `<div style="text-align:center;font-size:12px;color:var(--slate-400);padding:8px 0;">共 ${oshaData.length} 筆，顯示最新 8 筆</div>` : '';
+
+  const content = `
+    查詢到 <span class="highlight-bad">${oshaData.length} 筆</span>重大職業災害紀錄
+    ${hasDeaths ? `，合計死亡 <span class="highlight-bad">${totalDeaths} 人</span>` : ''}。
+    <div class="co-list" style="margin-top:12px;">${rows}${moreNote}</div>`;
+
+  return makeRow('⛑️', iconClass, '重大工安事件', tagClass, tagLabel, content,
+    '職安署原始資料', 'https://pacs.osha.gov.tw/');
 }
 
 /* ── 招 7｜集團關係 ── */
@@ -800,7 +873,7 @@ function row7(co, name, relatedCos) {
 }
 
 /* ── AI 建議 ── */
-function renderAiBox(co, name, relatedCos) {
+function renderAiBox(co, name, relatedCos, oshaData) {
   const box  = document.getElementById('aiBox');
   const body = document.getElementById('aiBoxBody');
   if (!co) {
@@ -828,6 +901,12 @@ function renderAiBox(co, name, relatedCos) {
     }
     if (coCnt > 5) {
       advice += `此外，負責人名下有 <strong>${coCnt} 家公司</strong>，集團規模較大，可確認主體公司與銷售個案的關係。`;
+    }
+    if (oshaData && oshaData.length > 0) {
+      const deaths = oshaData.reduce((s, r) => s + (parseInt(r.death) || 0), 0);
+      advice += `職安署查到 <strong>${oshaData.length} 筆工安紀錄</strong>${deaths > 0 ? `，含死亡事故 ${deaths} 人` : ''}，購屋前建議要求建商說明工地安全管理機制。`;
+    } else if (oshaData && oshaData.length === 0) {
+      advice += `職安署無重大工安紀錄（以建商名稱查詢），整體基本面尚可。`;
     }
   }
 
